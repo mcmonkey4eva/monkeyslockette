@@ -1,0 +1,19 @@
+name: monkeysLockette
+main: monkeysLockette.monkeysLockette
+version: 1
+commands:
+   mlock:
+      description: Monkey's Lockette
+      usage: /mlock
+      permission: monkeyslockette.command
+      permission-message: You don't have permission.
+   lockette:
+      description: Monkey's Lockette
+      usage: /lockette
+      permission: monkeyslockette.command
+      permission-message: You don't have permission.
+   lock:
+      description: Monkey's Lockette
+      usage: /lock
+      permission: monkeyslockette.command
+      permission-message: You don't have permission.
