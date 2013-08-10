@@ -21,6 +21,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -256,6 +257,34 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			return false;
 		}
 	}
+	public static boolean isallowed(Player player, String line, String name)
+	{
+		if (line.equalsIgnoreCase(name))
+		{
+			return true;
+		}
+		else if (line.equalsIgnoreCase("[everyone]"))
+		{
+			return true;
+		}
+		else if (line.toLowerCase().startsWith("g:"))
+		{
+			if (line.length() < 3)
+			{
+				return false;
+			}
+			if (!VaultEnabled)
+			{
+				return false;
+			}
+			String groupname = line.substring(2);
+			return VaultPerm.playerInGroup(player, groupname);
+		}
+		else
+		{
+			return false;
+		}
+	}
 	public static int checkallowed(Sign trysign, Player player)
 	{
 		if (player.hasPermission(PermissionBase + PermissionAdmin))
@@ -274,11 +303,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			{
 				return AT_OWNER;
 			}
-			else if (trysign.getLine(2).equalsIgnoreCase(name) || trysign.getLine(2).equalsIgnoreCase("[everyone]"))
+			else if (isallowed(player, trysign.getLine(2), name))
 			{
 				return AT_USER;
 			}
-			else if (trysign.getLine(3).equalsIgnoreCase(name) || trysign.getLine(3).equalsIgnoreCase("[everyone]"))
+			else if (isallowed(player, trysign.getLine(3), name))
 			{
 				return AT_USER;
 			}
@@ -289,15 +318,15 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		else if (isalockmoresign(title))
 		{
-			if (trysign.getLine(1).equalsIgnoreCase(name) || trysign.getLine(1).equalsIgnoreCase("[everyone]"))
+			if (isallowed(player, trysign.getLine(1), name))
 			{
 				return AT_USER;
 			}
-			else if (trysign.getLine(2).equalsIgnoreCase(name) || trysign.getLine(2).equalsIgnoreCase("[everyone]"))
+			else if (isallowed(player, trysign.getLine(2), name))
 			{
 				return AT_USER;
 			}
-			else if (trysign.getLine(3).equalsIgnoreCase(name) || trysign.getLine(3).equalsIgnoreCase("[everyone]"))
+			else if (isallowed(player, trysign.getLine(3), name))
 			{
 				return AT_USER;
 			}
@@ -311,7 +340,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			return AT_INVALID;
 		}
 	}
-	public boolean BlockProtectable(Block b)
+	public static boolean BlockProtectable(Block b)
 	{
 		Material mat = b.getType();
 		if (Util.Contains(ProtectedBlocks, mat) ||
@@ -540,6 +569,40 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			{
 				Sign trysign = (Sign)tb.getState();
 				String title = trysign.getLine(0);
+				Block potent = tb.getRelative(Util.DataToFace(tb.getData()));
+				if (BlockProtectable(potent))
+				{
+					if (Util.Contains(ProtectedDoors, potent.getType()))
+					{
+						if (potent.getRelative(BlockFace.DOWN).getType() == potent.getType())
+						{
+							potent = potent.getRelative(BlockFace.DOWN);
+						}
+						if (potent.getRelative(BlockFace.WEST).getType() == potent.getType())
+						{
+							potent = potent.getRelative(BlockFace.WEST);
+						}
+						if (potent.getRelative(BlockFace.SOUTH).getType() == potent.getType())
+						{
+							potent = potent.getRelative(BlockFace.SOUTH);
+						}
+					}
+					else if (Util.Contains(ProtectedChests, potent.getType()))
+					{
+						if (potent.getRelative(BlockFace.WEST).getType() == potent.getType())
+						{
+							potent = potent.getRelative(BlockFace.WEST);
+						}
+						if (potent.getRelative(BlockFace.SOUTH).getType() == potent.getType())
+						{
+							potent = potent.getRelative(BlockFace.SOUTH);
+						}
+					}
+					if (!potent.equals(b))
+					{
+						continue;
+					}
+				}
 				if (isalocksign(title))
 				{
 					thesign = trysign;
@@ -579,6 +642,15 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 		}
 		return AT_NOTALLOWED;
+	}
+	@EventHandler
+	public void onBlockRedstone(BlockRedstoneEvent event)
+	{
+		Block block = event.getBlock();
+		if (CheckLocked(block, null) != AT_INVALID)
+		{
+			event.setNewCurrent(0);
+		}
 	}
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event)
@@ -665,7 +737,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			}
 		}
-		if (allowed == AT_USER || allowed == AT_OWNER || allowed == AT_OP)
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK && (allowed == AT_USER || allowed == AT_OWNER || allowed == AT_OP))
 		{
 			if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 			{

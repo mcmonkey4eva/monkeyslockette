@@ -42,6 +42,25 @@ public class Util {
 			return 4;
 		}
 	}
+	public static BlockFace DataToFace(byte face)
+	{
+		if (face == 3)
+		{
+			return BlockFace.NORTH;
+		}
+		else if (face == 5)
+		{
+			return BlockFace.WEST;
+		}
+		else if (face == 2)
+		{
+			return BlockFace.SOUTH;
+		}
+		else
+		{
+			return BlockFace.EAST;
+		}
+	}
 	private static void FlipDoorInternal(Block door)
 	{
 		door.setData((byte)(door.getData() ^ 4));
