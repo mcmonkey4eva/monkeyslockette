@@ -296,9 +296,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		if (name.length() > 15)
 		{
 			name = name.substring(0, 15);
+			DebugInfo(player.getName() + " shortened  to " + name);
 		}
 		if (isalocksign(title))
 		{
+			DebugInfo(name + " comparing against " + trysign.getLine(1) + "/" + trysign.getLine(2) + "/" + trysign.getLine(3));
 			if (trysign.getLine(1).equalsIgnoreCase(name))
 			{
 				return AT_OWNER;
@@ -318,6 +320,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		else if (isalockmoresign(title))
 		{
+			DebugInfo(name + " comparing against " + trysign.getLine(1) + "/" + trysign.getLine(2) + "/" + trysign.getLine(3));
 			if (isallowed(player, trysign.getLine(1), name))
 			{
 				return AT_USER;
@@ -647,9 +650,15 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public void onBlockRedstone(BlockRedstoneEvent event)
 	{
 		Block block = event.getBlock();
-		if (CheckLocked(block, null) != AT_INVALID)
+		Material mat = block.getType();
+		DebugInfo("Redstone on " + String.valueOf(block.getTypeId()));
+		if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 		{
-			event.setNewCurrent(0);
+			if (CheckLocked(block, null) != AT_INVALID)
+			{
+				DebugInfo("RedNOPE");
+				event.setNewCurrent(0);
+			}
 		}
 	}
 	@EventHandler
@@ -851,6 +860,15 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			return;
 		}
 		Block block = event.getBlock();
+		if (block.getType() == Material.TRAP_DOOR)
+		{
+			if (CheckLocked(block, null) != AT_INVALID)
+			{
+				DebugInfo("Protected trapdoor from those annoying laws of physics!");
+				event.setCancelled(true);
+				return;
+			}
+		}
 		if (block.getType() == Material.WALL_SIGN)
 		{
 			Sign trysign = (Sign)block.getState();
@@ -990,6 +1008,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				if (args.length < 1)
 				{
 					sender.sendMessage("/" + command + " debug");
+					return true;
 				}
 				if (args[0].equalsIgnoreCase("debug"))
 				{
