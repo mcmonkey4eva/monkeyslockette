@@ -39,7 +39,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static boolean VaultEnabled = false;
 	public static Material[] ProtectedBlocks = new Material[] {Material.LEVER, Material.WOOD_BUTTON,
 		                     Material.STONE_BUTTON, Material.WOOD_PLATE, Material.STONE_PLATE, Material.FENCE_GATE,
-		                     Material.TRAP_DOOR, Material.FURNACE, Material.DISPENSER, Material.DROPPER,
+		                     Material.TRAP_DOOR, Material.FURNACE, Material.BURNING_FURNACE, Material.DISPENSER, Material.DROPPER,
 		                     Material.JUKEBOX, Material.NOTE_BLOCK};
 	public static Material[] ProtectedChests = new Material[] {Material.CHEST, Material.TRAPPED_CHEST};
 	public static Material[] ProtectedSmallDoors = new Material[] {Material.TRAP_DOOR, Material.FENCE_GATE};
