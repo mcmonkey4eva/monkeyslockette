@@ -2,6 +2,7 @@ package monkeysLockette;
 
 import java.util.ArrayList;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -32,10 +33,10 @@ public class DoorThread extends BukkitRunnable {
 			doors.remove(ind);
 		}
 	}
-	public static void toggledoor(Block door)
+	public static boolean toggledoor(Block door)
 	{
 		Block ddoor = door.getRelative(BlockFace.DOWN);
-		if (ddoor.getType() != door.getType())
+		if (ddoor.getType() != door.getType() && (door.getType() == Material.IRON_DOOR_BLOCK || door.getType() == Material.WOODEN_DOOR))
 		{
 			ddoor = door;
 		}
@@ -44,11 +45,13 @@ public class DoorThread extends BukkitRunnable {
 		{
 			doors.remove(ind);
 			monkeysLockette.DebugInfo("Door remove!");
+			return false;
 		}
 		else
 		{
 			doors.add(new DoorHolder(ddoor, monkeysLockette.CloseDoorsAfter));
 			monkeysLockette.DebugInfo("Door add!");
+			return true;
 		}
 	}
 	@Override

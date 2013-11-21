@@ -6,16 +6,24 @@ import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Chest;
+import org.bukkit.block.Dispenser;
+import org.bukkit.block.Dropper;
+import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -24,7 +32,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -339,6 +349,21 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	}
 	public static int checkallowed(Sign trysign, Player player)
 	{
+		return checkallowed(trysign, player, false);
+	}
+	public static int checkallowed(Sign trysign, Player player, boolean hopper)
+	{
+		if (hopper)
+		{
+			for (int i = 1; i < 4; i++)
+			{
+				if (trysign.getLine(i).toLowerCase().startsWith("[hopper"))
+				{
+					return AT_USER;
+				}
+			}
+			return AT_NOTALLOWED;
+		}
 		if (player.hasPermission(PermissionBase + PermissionAdmin))
 		{
 			return AT_OP;
@@ -481,6 +506,10 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	}
 	public static int CheckLocked(Block ab, Player player)
 	{
+		return CheckLocked(ab, player, false);
+	}
+	public static int CheckLocked(Block ab, Player player, boolean hopper)
+	{
 		Block b = ab;
 		Material mat = b.getType();
 		Location bloc = b.getLocation();
@@ -620,7 +649,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 					tb = tb.getRelative(face);
 				}
 			}
-			if (tb.getType() == Material.WALL_SIGN)
+			if (tb.getType() == Material.WALL_SIGN || tb.getType() == Material.SIGN_POST)
 			{
 				Sign trysign = (Sign)tb.getState();
 				String title = trysign.getLine(0);
@@ -675,6 +704,21 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		if (player == null)
 		{
+			int allowed = checkallowed(thesign, null, true);
+			DebugInfo("Allowed? " + String.valueOf(allowed));
+			if (allowed == AT_OP || allowed == AT_OWNER || allowed == AT_USER)
+			{
+				return allowed;
+			}
+			for (Sign trysign: moresigns)
+			{
+				allowed = checkallowed(trysign, null, true);
+				DebugInfo("More Allowed? " + String.valueOf(allowed));
+				if (allowed == AT_USER)
+				{
+					return AT_USER;
+				}
+			}
 			return AT_NOTALLOWED;
 		}
 		if (player.hasPermission(PermissionBase + PermissionAdmin))
@@ -699,11 +743,28 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		return AT_NOTALLOWED;
 	}
 	@EventHandler
+	public void onInventoryMove(InventoryMoveItemEvent event)
+	{
+		InventoryHolder IH = event.getSource().getHolder();
+		if (IH instanceof BlockState && (event.getDestination().getHolder() instanceof BlockState || event.getDestination().getHolder() instanceof Minecart))
+		{
+			Block b = ((BlockState) IH).getBlock();
+			DebugInfo("Potential hopper at " + b.getLocation().toString());
+			int allowed = CheckLocked(b, null, true);
+			DebugInfo("allowed = " + String.valueOf(allowed));
+			if (allowed == AT_NOTALLOWED)
+			{
+				DebugInfo("DENIED!");
+				event.setCancelled(true);
+			}
+		}
+	}
+	@EventHandler
 	public void onBlockRedstone(BlockRedstoneEvent event)
 	{
 		Block block = event.getBlock();
 		Material mat = block.getType();
-		DebugInfo("Redstone on " + String.valueOf(block.getTypeId()));
+		DebugInfo("Redstone on " + block.getType().name() + " at " + block.getLocation().toString());
 		if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 		{
 			if (CheckLocked(block, null) != AT_INVALID)
@@ -713,7 +774,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onPlayerInteract(PlayerInteractEvent event)
 	{
 		if (event.isCancelled())
@@ -727,7 +788,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		Player player = event.getPlayer();
 		Block block = event.getClickedBlock();
-		DebugInfo("Interact with a " + String.valueOf(block.getTypeId()));
+		DebugInfo("Interact with a " + block.getType().name());
 		int allowed = CheckLocked(block, player);
 		DebugInfo("Allowed returned " + String.valueOf(allowed) + ".");
 		Material mat = block.getType();
@@ -761,6 +822,13 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 							Block signspot = block.getRelative(bf);
 							if (signspot.getType() == Material.AIR)
 							{
+								BlockPlaceEvent evt = new BlockPlaceEvent(signspot, signspot.getState(), signspot, player.getItemInHand(), player, true);
+								Bukkit.getServer().getPluginManager().callEvent(evt);
+								if (evt.isCancelled() || !evt.canBuild())
+								{
+									DebugInfo(player.getName() + " tried to add sign at " + player.getLocation().toString() + " build was denied by a build protection plugin.");
+									return;
+								}
 								signspot.setType(Material.WALL_SIGN);
 								signspot.setData(Util.FaceToData(bf.getOppositeFace()));
 								Sign newsign = (Sign)signspot.getState();
@@ -802,16 +870,18 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		{
 			if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 			{
-				DoorThread.toggledoor(block);
+				if (block.getType() == Material.IRON_DOOR_BLOCK)
+				{
+					Util.FlipDoor(block, DoorThread.toggledoor(block));
+				}
+				else
+				{
+					DoorThread.toggledoor(block);
+				}
 				Block con = Util.findconnected(block);
 				if (con != null)
 				{
-					Util.FlipDoor(con);
-					DoorThread.toggledoor(con);
-				}
-				if (block.getType() == Material.IRON_DOOR_BLOCK)
-				{
-					Util.FlipDoor(block);
+					Util.FlipDoor(con, DoorThread.toggledoor(con));
 				}
 			}
 		}
@@ -844,11 +914,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				player.sendMessage(WarnColor + NopermMessage);
 				return;
 			}
-			if (!isalockmore && ((player.hasPermission(PermissionBase + PermissionAdmin) && event.getLine(1).length() == 0) || (!event.getLine(1).equalsIgnoreCase(player.getName()))))
+			if (!isalockmore && ((!player.hasPermission(PermissionBase + PermissionAdmin) || event.getLine(1).length() == 0)))
 			{
 				event.setLine(1, player.getName());
 			}
-			event.setLine(0, SignColor + title);
+			event.setLine(0, SignColor + (isalockmore ? "[More Users]": "[Lock]"));
 			Block targ = whatwouldthisprotect(block.getLocation());
 			if (targ == null)
 			{
@@ -876,7 +946,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			{
 				Log.info(player.getName() + " made a moreusers sign at " + event.getBlock().getLocation().toString() + ".");
 			}
-			if (block.getType() == Material.SIGN_POST)
+			/*if (block.getType() == Material.SIGN_POST)
 			{
 				block.setType(Material.WALL_SIGN);
 				if (BlockProtectable(block.getRelative(BlockFace.NORTH)))
@@ -901,7 +971,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				tomake.setLine(2, event.getLine(2));
 				tomake.setLine(3, event.getLine(3));
 				tomake.update();
-			}
+			}*/
 		}
 	}
 	@EventHandler
@@ -921,7 +991,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				return;
 			}
 		}
-		if (block.getType() == Material.WALL_SIGN)
+		if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST)
 		{
 			Sign trysign = (Sign)block.getState();
 			String title = trysign.getLine(0);
@@ -950,7 +1020,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
 		Material mat = block.getType();
-		if (mat == Material.WALL_SIGN)
+		if (mat == Material.WALL_SIGN || mat == Material.SIGN_POST)
 		{
 			Sign trysign = (Sign)block.getState();
 			String title = trysign.getLine(0);
@@ -1089,12 +1159,12 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			else if (args[0].equalsIgnoreCase("line"))
 			{
-				Block target = player.getTargetBlock(null, 10);
-				if (args.length < 3)
+				if (args.length < 2)
 				{
-					sender.sendMessage(CommonColor + "/" + command + " line <#> [message] - Change a line on the sign you're targetting");
+					sender.sendMessage(CommonColor + "/" + command + " line <#> [text] - Change a line on the sign you're targetting");
 				}
-				if (target == null || target.getType() != Material.WALL_SIGN)
+				Block target = player.getTargetBlock(null, 10);
+				if (target == null || (target.getType() != Material.WALL_SIGN && target.getType() != Material.SIGN_POST))
 				{
 					sender.sendMessage(WarnColor + NosignMessage);
 				}
@@ -1175,7 +1245,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 						sender.sendMessage(WarnColor + RefuseMessage);
 						return true;
 					}
-					Util.FlipDoor(target);
+					Util.FlipDoor(target, true);
 				}
 			}
 			else

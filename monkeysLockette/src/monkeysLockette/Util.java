@@ -64,9 +64,8 @@ public class Util {
 	private static void FlipDoorInternal(Block door)
 	{
 		door.setData((byte)(door.getData() ^ 4));
-		door.getWorld().playSound(door.getLocation(), Sound.DOOR_OPEN, 2, 1);
 	}
-	public static void FlipDoor(Block door)
+	public static void FlipDoor(Block door, boolean openorclose)
 	{
 		Material mat = door.getType();
 		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK)
@@ -81,6 +80,7 @@ public class Util {
 			}
 		}
 		FlipDoorInternal(door);
+		door.getWorld().playSound(door.getLocation(), openorclose ? Sound.DOOR_OPEN: Sound.DOOR_CLOSE, 2, 1);
 	}
 	public static Block findconnected(Block door)
 	{

@@ -22,7 +22,7 @@ public class DoorHolder {
 		{
 			return true;
 		}
-		Util.FlipDoor(Door);
+		Util.FlipDoor(Door, false);
 		return false;
 	}
 }
