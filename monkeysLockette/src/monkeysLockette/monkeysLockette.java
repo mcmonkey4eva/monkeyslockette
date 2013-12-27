@@ -27,6 +27,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockCanBuildEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockRedstoneEvent;
@@ -39,6 +40,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 
 public class monkeysLockette extends JavaPlugin implements Listener {
 	public static Plugin plug;
@@ -228,6 +231,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static ArrayList<Block> ToClose;
 	public static String SignColor = "§b";
 	public static String WarnColor = "§c";
+	public static String CommonColor = "§6";
 	public static String RefuseMessage = "This block is locked.";
 	public static String NopermMessage = "You aren't allowed to do that.";
 	public static String EmptyMessage = "There's nothing to protect here.";
@@ -236,7 +240,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static String BadlineMessage = "Only lines 2, 3, and 4 are permitted.";
 	public static String NotthatlineMessage = "You can't edit that line.";
 	public static String NotlockedMessage = "This isn't locked.";
-	public static String CommonColor = "§6";
+	public static String NobuildMessage = "You are not allowed to build here.";
 	public static String FirstlockableMessage = "Place a sign headed [Lock] next to that to lock it.";
 	public static String PermissionBase = "monkeyslockette.";
 	public static String PermissionAdmin = "admin";
@@ -249,6 +253,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 	}
 	public static DoorThread dt;
+	WorldGuardPlugin wg;
 	public void onEnable()
 	{
 		Log = getLogger();
@@ -264,6 +269,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		{
 			Log.info("Error loading Vault!");
 		}
+		wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
 		dt = new DoorThread();
 		dt.runTaskTimer(this, 20, 20);
 		ToClose = new ArrayList<Block>();
@@ -822,11 +828,12 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 							Block signspot = block.getRelative(bf);
 							if (signspot.getType() == Material.AIR)
 							{
-								BlockPlaceEvent evt = new BlockPlaceEvent(signspot, signspot.getState(), signspot, player.getItemInHand(), player, true);
+								BlockCanBuildEvent evt = new BlockCanBuildEvent(signspot, Material.WALL_SIGN.getId(), true);
 								Bukkit.getServer().getPluginManager().callEvent(evt);
-								if (evt.isCancelled() || !evt.canBuild())
+								if (!evt.isBuildable() || (wg != null && !wg.getGlobalRegionManager().canBuild(player, signspot)))
 								{
-									DebugInfo(player.getName() + " tried to add sign at " + player.getLocation().toString() + " build was denied by a build protection plugin.");
+									DebugInfo(player.getName() + " tried to add sign at " + player.getLocation().toString() + "- build was denied by a build protection plugin.");
+									player.sendMessage(WarnColor + NobuildMessage);
 									return;
 								}
 								signspot.setType(Material.WALL_SIGN);

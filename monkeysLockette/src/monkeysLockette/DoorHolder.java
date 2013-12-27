@@ -22,6 +22,7 @@ public class DoorHolder {
 		{
 			return true;
 		}
+		monkeysLockette.DebugInfo("Door flipback!");
 		Util.FlipDoor(Door, false);
 		return false;
 	}

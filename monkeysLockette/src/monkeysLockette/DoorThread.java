@@ -36,7 +36,7 @@ public class DoorThread extends BukkitRunnable {
 	public static boolean toggledoor(Block door)
 	{
 		Block ddoor = door.getRelative(BlockFace.DOWN);
-		if (ddoor.getType() != door.getType() && (door.getType() == Material.IRON_DOOR_BLOCK || door.getType() == Material.WOODEN_DOOR))
+		if (ddoor.getType() != door.getType() || (door.getType() != Material.IRON_DOOR_BLOCK && door.getType() != Material.WOODEN_DOOR))
 		{
 			ddoor = door;
 		}
