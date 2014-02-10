@@ -13,10 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Chest;
-import org.bukkit.block.Dispenser;
-import org.bukkit.block.Dropper;
-import org.bukkit.block.Furnace;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -53,7 +49,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static Material[] ProtectedBlocks = new Material[] {Material.LEVER, Material.WOOD_BUTTON,
 		                     Material.STONE_BUTTON, Material.WOOD_PLATE, Material.STONE_PLATE, Material.FENCE_GATE,
 		                     Material.TRAP_DOOR, Material.FURNACE, Material.BURNING_FURNACE, Material.DISPENSER, Material.DROPPER,
-		                     Material.JUKEBOX, Material.NOTE_BLOCK};
+		                     Material.JUKEBOX, Material.NOTE_BLOCK, Material.HOPPER };
 	public static Material[] ProtectedChests = new Material[] {Material.CHEST, Material.TRAPPED_CHEST};
 	public static Material[] ProtectedSmallDoors = new Material[] {Material.TRAP_DOOR, Material.FENCE_GATE};
 	public static Material[] ProtectedDoors = new Material[] {Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK};
@@ -442,7 +438,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			return false;
 		}
 	}
-	public Block whatwouldthisprotect(Location loc)
+	public static Block whatwouldthisprotect(Location loc)
 	{
 		if (loc.getY() > 250 || loc.getY() < 5)
 		{
@@ -1192,7 +1188,13 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 						return true;
 					}
 					Sign trysign = (Sign)target.getState();
-					int allowed = checkallowed(trysign, player);
+					Block b = whatwouldthisprotect(trysign.getLocation());
+					if (b == null)
+					{
+						sender.sendMessage(WarnColor + NotlockedMessage);
+						return true;
+					}
+					int allowed = CheckLocked(b, player);
 					if (allowed == AT_INVALID)
 					{
 						sender.sendMessage(WarnColor + NotlockedMessage);
