@@ -46,13 +46,10 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static Economy VaultEcon;
 	public static Permission VaultPerm;
 	public static boolean VaultEnabled = false;
-	public static Material[] ProtectedBlocks = new Material[] {Material.LEVER, Material.WOOD_BUTTON,
-		                     Material.STONE_BUTTON, Material.WOOD_PLATE, Material.STONE_PLATE, Material.FENCE_GATE,
-		                     Material.TRAP_DOOR, Material.FURNACE, Material.BURNING_FURNACE, Material.DISPENSER, Material.DROPPER,
-		                     Material.JUKEBOX, Material.NOTE_BLOCK, Material.HOPPER };
+	public static Material[] ProtectedBlocks;
 	public static Material[] ProtectedChests = new Material[] {Material.CHEST, Material.TRAPPED_CHEST};
-	public static Material[] ProtectedSmallDoors = new Material[] {Material.TRAP_DOOR, Material.FENCE_GATE};
-	public static Material[] ProtectedDoors = new Material[] {Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK};
+	public static Material[] ProtectedSmallDoors;
+	public static Material[] ProtectedDoors;
 	public static Material[] ProtectedNoOutput = new Material[] {Material.WOOD_PLATE, Material.STONE_PLATE};
 	public static BlockFace[][] ProtectedBlockLocations = new BlockFace[][]
 			{
@@ -270,6 +267,15 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		dt.runTaskTimer(this, 20, 20);
 		ToClose = new ArrayList<Block>();
 		Log.info("Ready!");
+		 ProtectedBlocks = new Material[] {Material.LEVER, Material.WOOD_BUTTON,
+                 Material.STONE_BUTTON, Material.WOOD_PLATE, Material.STONE_PLATE, Material.FENCE_GATE,
+                 Material.TRAP_DOOR, Material.FURNACE, Material.BURNING_FURNACE, Material.DISPENSER, Material.DROPPER,
+                 Material.JUKEBOX, Material.NOTE_BLOCK, Material.HOPPER};
+		 ProtectedDoors = new Material[] {Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK, Material.getMaterial(193),
+		   		 Material.getMaterial(194), Material.getMaterial(195), Material.getMaterial(196),
+						 Material.getMaterial(197)};
+		 ProtectedSmallDoors = new Material[] {Material.TRAP_DOOR, Material.FENCE_GATE, Material.getMaterial(183)
+				 , Material.getMaterial(184), Material.getMaterial(185), Material.getMaterial(186), Material.getMaterial(187)};
 	}
     private boolean linkVault() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {

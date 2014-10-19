@@ -68,24 +68,28 @@ public class Util {
 	public static void FlipDoor(Block door, boolean openorclose)
 	{
 		Material mat = door.getType();
-		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK)
+		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK
+				|| (mat.getId() >= 193 && mat.getId() <= 197))
 		{
-			if (door.getRelative(BlockFace.UP).getType() == mat)
-			{
-				FlipDoorInternal(door.getRelative(BlockFace.UP));
-			}
 			if (door.getRelative(BlockFace.DOWN).getType() == mat)
 			{
 				FlipDoorInternal(door.getRelative(BlockFace.DOWN));
 			}
+			else
+			{
+				FlipDoorInternal(door);
+			}
 		}
-		FlipDoorInternal(door);
+		else
+		{
+			FlipDoorInternal(door);
+		}
 		door.getWorld().playSound(door.getLocation(), openorclose ? Sound.DOOR_OPEN: Sound.DOOR_CLOSE, 2, 1);
 	}
 	public static Block findconnected(Block door)
 	{
 		Material mat = door.getType();
-		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK)
+		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || (mat.getId() >= 193 && mat.getId() <= 197))
 		{
 			Block tb = door.getRelative(BlockFace.NORTH);
 			if (tb.getType() == mat)
