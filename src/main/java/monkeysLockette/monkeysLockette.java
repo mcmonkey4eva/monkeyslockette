@@ -1,6 +1,7 @@
 package monkeysLockette;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
@@ -222,9 +223,9 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			};
 	public static int CloseDoorsAfter = 7;
 	public static ArrayList<Block> ToClose;
-	public static String SignColor = "§b";
-	public static String WarnColor = "§c";
-	public static String CommonColor = "§6";
+	public static String SignColor = "ï¿½b";
+	public static String WarnColor = "ï¿½c";
+	public static String CommonColor = "ï¿½6";
 	public static String RefuseMessage = "This block is locked.";
 	public static String NopermMessage = "You aren't allowed to do that.";
 	public static String EmptyMessage = "There's nothing to protect here.";
@@ -949,11 +950,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			if (isalockmore)
 			{
-				Log.info(player.getName() + " made a lock sign at " + event.getBlock().getLocation().toString() + ".");
+				Log.info(player.getName() + " made a more users at " + event.getBlock().getLocation().toString() + ".");
 			}
 			else
 			{
-				Log.info(player.getName() + " made a moreusers sign at " + event.getBlock().getLocation().toString() + ".");
+				Log.info(player.getName() + " made a lock sign at " + event.getBlock().getLocation().toString() + ".");
 			}
 			/*if (block.getType() == Material.SIGN_POST)
 			{
@@ -1172,7 +1173,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				{
 					sender.sendMessage(CommonColor + "/" + command + " line <#> [text] - Change a line on the sign you're targetting");
 				}
-				Block target = player.getTargetBlock(null, 10);
+				Block target = player.getTargetBlock((HashSet<Byte>) null, 10);
 				if (target == null || (target.getType() != Material.WALL_SIGN && target.getType() != Material.SIGN_POST))
 				{
 					sender.sendMessage(WarnColor + NosignMessage);
@@ -1242,7 +1243,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			else if (args[0].equalsIgnoreCase("fix"))
 			{
-				Block target = player.getTargetBlock(null, 10);
+				Block target = player.getTargetBlock((HashSet<Byte>) null, 10);
 				if (target == null || !(Util.Contains(ProtectedDoors, target.getType()) || Util.Contains(ProtectedSmallDoors, target.getType())))
 				{
 					sender.sendMessage(WarnColor + NodoorMessage);
