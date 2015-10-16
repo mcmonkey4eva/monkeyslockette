@@ -813,6 +813,10 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		else
 		{
+			if (player.isSneaking()) {
+				DebugInfo(player.getName() + "Was sneaking, ignoring!");
+                return;
+			}
 			ItemStack held = player.getItemInHand();
 			if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
 			{
