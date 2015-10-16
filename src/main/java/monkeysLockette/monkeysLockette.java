@@ -7,10 +7,7 @@ import java.util.logging.Logger;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -223,9 +220,9 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			};
 	public static int CloseDoorsAfter = 7;
 	public static ArrayList<Block> ToClose;
-	public static String SignColor = "�b";
-	public static String WarnColor = "�c";
-	public static String CommonColor = "�6";
+	public static String SignColor = ChatColor.COLOR_CHAR + "b";
+	public static String WarnColor = ChatColor.COLOR_CHAR + "c";
+	public static String CommonColor = ChatColor.COLOR_CHAR + "6";
 	public static String RefuseMessage = "This block is locked.";
 	public static String NopermMessage = "You aren't allowed to do that.";
 	public static String EmptyMessage = "There's nothing to protect here.";
