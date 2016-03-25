@@ -15,6 +15,7 @@ Permissions:
 
 - monkeyslockette.admin - administrative control (bypass, etc.)
 - monkeyslockette.create - general user control (placing signs, etc.)
+- monkeyslockette.command - the /lock command
 
 ### Warning
 

@@ -84,7 +84,7 @@ public class Util {
 		{
 			FlipDoorInternal(door);
 		}
-		door.getWorld().playSound(door.getLocation(), openorclose ? Sound.DOOR_OPEN: Sound.DOOR_CLOSE, 2, 1);
+		door.getWorld().playSound(door.getLocation(), openorclose ? Sound.BLOCK_WOODEN_DOOR_OPEN: Sound.BLOCK_WOODEN_DOOR_CLOSE, 2, 1);
 	}
 	public static Block findconnected(Block door)
 	{
@@ -120,7 +120,7 @@ public class Util {
 	}
 	public static String getMetadata(Player player, String key)
 	{
-		  List<MetadataValue> values = player.getMetadata(key);  
+		  List<MetadataValue> values = player.getMetadata(key);
 		  for(MetadataValue value : values)
 		  {
 		     if(value.getOwningPlugin().getDescription().getName().equals(monkeysLockette.plug.getDescription().getName()))
