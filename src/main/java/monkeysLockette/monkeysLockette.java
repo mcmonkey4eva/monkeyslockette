@@ -357,6 +357,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	{
 		return checkallowed(trysign, player, false);
 	}
+
 	public static int checkallowed(Sign trysign, Player player, boolean hopper)
 	{
 		if (hopper)
@@ -376,11 +377,6 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		}
 		String title = trysign.getLine(0);
 		String name = player.getName();
-		if (name.length() > 15)
-		{
-			name = name.substring(0, 15);
-			DebugInfo(player.getName() + " shortened  to " + name);
-		}
 		if (isalocksign(title))
 		{
 			DebugInfo(name + " comparing against " + trysign.getLine(1) + "/" + trysign.getLine(2) + "/" + trysign.getLine(3));
