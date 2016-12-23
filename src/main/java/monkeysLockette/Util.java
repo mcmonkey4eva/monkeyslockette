@@ -7,7 +7,10 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.material.Door;
+import org.bukkit.material.Openable;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
@@ -63,7 +66,10 @@ public class Util {
 	}
 	private static void FlipDoorInternal(Block door)
 	{
-		door.setData((byte)(door.getData() ^ 4));
+		BlockState bs = door.getState();
+		Openable theDoor = (Openable) bs.getData();
+		theDoor.setOpen(!theDoor.isOpen());
+		bs.update();
 	}
 	public static void FlipDoor(Block door, boolean openorclose)
 	{
@@ -116,7 +122,7 @@ public class Util {
 	}
 	public static void setMetadata(Player player, String key, Object value)
 	{
-		  player.setMetadata(key, new FixedMetadataValue(monkeysLockette.plug,value));
+		  player.setMetadata(key, new FixedMetadataValue(monkeysLockette.plug, value));
 	}
 	public static String getMetadata(Player player, String key)
 	{

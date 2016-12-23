@@ -29,6 +29,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -873,7 +874,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			}
 		}
-		if (event.getAction() == Action.RIGHT_CLICK_BLOCK && (allowed == AT_USER || allowed == AT_OWNER || allowed == AT_OP))
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND && (allowed == AT_USER || allowed == AT_OWNER || allowed == AT_OP))
 		{
 			if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 			{
