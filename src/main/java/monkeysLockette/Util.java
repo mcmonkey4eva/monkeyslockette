@@ -1,30 +1,29 @@
 package monkeysLockette;
 
-
+import java.util.HashSet;
 import java.util.List;
 
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
+import org.bukkit.block.data.Openable;
 import org.bukkit.entity.Player;
-import org.bukkit.material.Door;
-import org.bukkit.material.Openable;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 public class Util {
-	public static boolean Contains(Material[] list, Material mat)
+	public static boolean Contains(HashSet<Material> list, Material mat)
 	{
-		for (Material check: list)
+		return list.contains(mat);
+		/*for (Material check: list)
 		{
 			if (check == mat)
 			{
 				return true;
 			}
 		}
-		return false;
+		return false;*/
 	}
 	public static byte FaceToData(BlockFace face)
 	{
@@ -66,16 +65,15 @@ public class Util {
 	}
 	private static void FlipDoorInternal(Block door)
 	{
-		BlockState bs = door.getState();
-		Openable theDoor = (Openable) bs.getData();
-		theDoor.setOpen(!theDoor.isOpen());
-		bs.update();
+		Openable doorOpenable = (Openable) door.getBlockData();
+		doorOpenable.setOpen(!doorOpenable.isOpen());
+		door.setBlockData(doorOpenable);
 	}
 	public static void FlipDoor(Block door, boolean openorclose)
 	{
 		Material mat = door.getType();
-		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK
-				|| (mat.getId() >= 193 && mat.getId() <= 197))
+		if (mat.name().endsWith("_DOOR")
+				&& door.getBlockData() instanceof Openable)
 		{
 			if (door.getRelative(BlockFace.DOWN).getType() == mat)
 			{
@@ -95,7 +93,8 @@ public class Util {
 	public static Block findconnected(Block door)
 	{
 		Material mat = door.getType();
-		if (mat == Material.WOODEN_DOOR || mat == Material.IRON_DOOR_BLOCK || (mat.getId() >= 193 && mat.getId() <= 197))
+		if (mat.name().endsWith("_DOOR")
+				&& door.getBlockData() instanceof Openable)
 		{
 			Block tb = door.getRelative(BlockFace.NORTH);
 			if (tb.getType() == mat)

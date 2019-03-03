@@ -1,7 +1,6 @@
 package monkeysLockette;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.logging.Logger;
 
 import net.milkbowl.vault.economy.Economy;
@@ -12,6 +11,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Rotatable;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Minecart;
@@ -45,11 +46,17 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public static Economy VaultEcon;
 	public static Permission VaultPerm;
 	public static boolean VaultEnabled = false;
-	public static Material[] ProtectedBlocks;
-	public static Material[] ProtectedChests = new Material[] {Material.CHEST, Material.TRAPPED_CHEST};
-	public static Material[] ProtectedSmallDoors;
-	public static Material[] ProtectedDoors;
-	public static Material[] ProtectedNoOutput = new Material[] {Material.WOOD_PLATE, Material.STONE_PLATE};
+	public static HashSet<Material> TRAP_DOORS = new HashSet<Material>(Arrays.asList(Material.ACACIA_TRAPDOOR, Material.BIRCH_TRAPDOOR,
+					Material.DARK_OAK_TRAPDOOR, Material.JUNGLE_TRAPDOOR, Material.OAK_TRAPDOOR,
+					Material.SPRUCE_TRAPDOOR));
+	public static HashSet<Material> ProtectedBlocks;
+	public static HashSet<Material> ProtectedChests = new HashSet<Material>(Arrays.asList(Material.CHEST, Material.TRAPPED_CHEST));
+	public static HashSet<Material> ProtectedSmallDoors;
+	public static HashSet<Material> ProtectedDoors;
+	public static HashSet<Material> ProtectedNoOutput = new HashSet<Material>(Arrays.asList(Material.STONE_PRESSURE_PLATE, Material.SPRUCE_PRESSURE_PLATE,
+		Material.ACACIA_PRESSURE_PLATE, Material.BIRCH_PRESSURE_PLATE, Material.DARK_OAK_PRESSURE_PLATE,
+		Material.HEAVY_WEIGHTED_PRESSURE_PLATE, Material.JUNGLE_PRESSURE_PLATE, Material.LIGHT_WEIGHTED_PRESSURE_PLATE,
+		Material.OAK_PRESSURE_PLATE));
 	public static BlockFace[][] ProtectedBlockLocations = new BlockFace[][]
 			{
 		new BlockFace[] {BlockFace.NORTH}, new BlockFace[] {BlockFace.WEST},
@@ -266,15 +273,22 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		dt.runTaskTimer(this, 20, 20);
 		ToClose = new ArrayList<Block>();
 		Log.info("Ready!");
-		 ProtectedBlocks = new Material[] {Material.LEVER, Material.WOOD_BUTTON,
-                 Material.STONE_BUTTON, Material.WOOD_PLATE, Material.STONE_PLATE, Material.FENCE_GATE,
-                 Material.TRAP_DOOR, Material.FURNACE, Material.BURNING_FURNACE, Material.DISPENSER, Material.DROPPER,
-                 Material.JUKEBOX, Material.NOTE_BLOCK, Material.HOPPER};
-		 ProtectedDoors = new Material[] {Material.WOODEN_DOOR, Material.IRON_DOOR_BLOCK, Material.getMaterial(193),
-		   		 Material.getMaterial(194), Material.getMaterial(195), Material.getMaterial(196),
-						 Material.getMaterial(197)};
-		 ProtectedSmallDoors = new Material[] {Material.TRAP_DOOR, Material.FENCE_GATE, Material.getMaterial(183)
-				 , Material.getMaterial(184), Material.getMaterial(185), Material.getMaterial(186), Material.getMaterial(187)};
+		List<Material> FENCE_GATES = Arrays.asList(Material.ACACIA_FENCE_GATE, Material.BIRCH_FENCE_GATE,
+			Material.DARK_OAK_FENCE_GATE, Material.JUNGLE_FENCE_GATE, Material.OAK_FENCE_GATE,
+		Material.SPRUCE_FENCE_GATE);
+		 ProtectedBlocks = new HashSet<Material>(Arrays.asList(Material.LEVER, Material.ACACIA_BUTTON,
+				 Material.BIRCH_BUTTON, Material.DARK_OAK_BUTTON, Material.JUNGLE_BUTTON, Material.OAK_BUTTON,
+                 Material.SPRUCE_BUTTON, Material.STONE_BUTTON, Material.FURNACE, Material.DISPENSER, Material.DROPPER,
+				 Material.JUKEBOX, Material.NOTE_BLOCK, Material.HOPPER));
+		 ProtectedBlocks.addAll(ProtectedNoOutput);
+		 ProtectedBlocks.addAll(FENCE_GATES);
+		 ProtectedBlocks.addAll(TRAP_DOORS);
+		List<Material> DOORS = Arrays.asList(Material.ACACIA_DOOR, Material.BIRCH_DOOR,
+				Material.DARK_OAK_DOOR, Material.JUNGLE_DOOR, Material.OAK_DOOR,
+				Material.SPRUCE_DOOR, Material.IRON_DOOR);
+		 ProtectedDoors = new HashSet<Material>(DOORS);
+		 ProtectedSmallDoors = new HashSet<Material>(FENCE_GATES);
+		 ProtectedSmallDoors.addAll(TRAP_DOORS);
 	}
     private boolean linkVault() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -652,7 +666,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 					tb = tb.getRelative(face);
 				}
 			}
-			if (tb.getType() == Material.WALL_SIGN || tb.getType() == Material.SIGN_POST)
+			if (tb.getType() == Material.WALL_SIGN || tb.getType() == Material.SIGN)
 			{
 				Sign trysign = (Sign)tb.getState();
 				String title = trysign.getLine(0);
@@ -829,7 +843,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 							Block signspot = block.getRelative(bf);
 							if (signspot.getType() == Material.AIR)
 							{
-								BlockCanBuildEvent evt = new BlockCanBuildEvent(signspot, Material.WALL_SIGN.getId(), true);
+								BlockCanBuildEvent evt = new BlockCanBuildEvent(signspot, player, Material.WALL_SIGN.createBlockData(), true);
 								Bukkit.getServer().getPluginManager().callEvent(evt);
 								if (!evt.isBuildable() || (wg != null && !wg.getGlobalRegionManager().canBuild(player, signspot)))
 								{
@@ -838,8 +852,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 									return;
 								}
 								signspot.setType(Material.WALL_SIGN);
-								signspot.setData(Util.FaceToData(bf.getOppositeFace()));
+								BlockData data = Material.WALL_SIGN.createBlockData();
+								Rotatable rot = (Rotatable) data;
+								rot.setRotation(bf.getOppositeFace());
 								Sign newsign = (Sign)signspot.getState();
+								newsign.setBlockData(data);
 								if (allowed == AT_INVALID)
 								{
 									newsign.setLine(0, SignColor + "[Lock]");
@@ -878,7 +895,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		{
 			if (Util.Contains(ProtectedDoors, mat) || Util.Contains(ProtectedSmallDoors, mat))
 			{
-				if (block.getType() == Material.IRON_DOOR_BLOCK)
+				if (block.getType() == Material.IRON_DOOR)
 				{
 					Util.FlipDoor(block, DoorThread.toggledoor(block));
 				}
@@ -990,7 +1007,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			return;
 		}
 		Block block = event.getBlock();
-		if (block.getType() == Material.TRAP_DOOR)
+		if (TRAP_DOORS.contains(block.getType()))
 		{
 			if (CheckLocked(block, null) != AT_INVALID)
 			{
@@ -999,7 +1016,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				return;
 			}
 		}
-		if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN_POST)
+		if (block.getType() == Material.WALL_SIGN || block.getType() == Material.SIGN)
 		{
 			Sign trysign = (Sign)block.getState();
 			String title = trysign.getLine(0);
@@ -1028,7 +1045,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		Player player = event.getPlayer();
 		Block block = event.getBlock();
 		Material mat = block.getType();
-		if (mat == Material.WALL_SIGN || mat == Material.SIGN_POST)
+		if (mat == Material.WALL_SIGN || mat == Material.SIGN)
 		{
 			Sign trysign = (Sign)block.getState();
 			String title = trysign.getLine(0);
@@ -1171,8 +1188,8 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				{
 					sender.sendMessage(CommonColor + "/" + command + " line <#> [text] - Change a line on the sign you're targetting");
 				}
-				Block target = player.getTargetBlock((HashSet<Byte>) null, 10);
-				if (target == null || (target.getType() != Material.WALL_SIGN && target.getType() != Material.SIGN_POST))
+				Block target = player.getTargetBlock((Set<Material>) null, 10);
+				if (target == null || (target.getType() != Material.WALL_SIGN && target.getType() != Material.SIGN))
 				{
 					sender.sendMessage(WarnColor + NosignMessage);
 				}
@@ -1241,7 +1258,7 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			else if (args[0].equalsIgnoreCase("fix"))
 			{
-				Block target = player.getTargetBlock((HashSet<Byte>) null, 10);
+				Block target = player.getTargetBlock((Set<Material>) null, 10);
 				if (target == null || !(Util.Contains(ProtectedDoors, target.getType()) || Util.Contains(ProtectedSmallDoors, target.getType())))
 				{
 					sender.sendMessage(WarnColor + NodoorMessage);

@@ -1,5 +1,6 @@
 name: monkeysLockette
 main: monkeysLockette.monkeysLockette
+api-version: 1.13
 version: 1
 commands:
    mlock:

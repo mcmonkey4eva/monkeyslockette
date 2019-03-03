@@ -3,6 +3,8 @@ monkey's lockette
 
 Lockette remake primarly for my personal use, but made available to all.
 
+Current version is explicitly for 1.13+ (not older versions - for those see previous commits)
+
 Download: [Click Here](https://github.com/mcmonkey4eva/monkeyslockette/raw/master/MonkeysLockette.jar)
 
 Sign options:  
