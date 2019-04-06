@@ -9,10 +9,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Rotatable;
 import org.bukkit.command.Command;
@@ -765,7 +762,11 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	public void onInventoryMove(InventoryMoveItemEvent event)
 	{
 		InventoryHolder IH = event.getSource().getHolder();
-		if (IH instanceof BlockState && (event.getDestination().getHolder() instanceof BlockState || event.getDestination().getHolder() instanceof Minecart))
+		if (IH instanceof DoubleChest) {
+			IH = ((DoubleChest) IH).getLeftSide();
+		}
+		if (IH instanceof BlockState
+				&& (event.getDestination().getHolder() instanceof BlockState || event.getDestination().getHolder() instanceof Minecart))
 		{
 			Block b = ((BlockState) IH).getBlock();
 			DebugInfo("Potential hopper at " + b.getLocation().toString());
