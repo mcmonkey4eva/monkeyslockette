@@ -1,7 +1,10 @@
 name: monkeysLockette
 main: monkeysLockette.monkeysLockette
-api-version: 1.13
 version: 1
+softdepend: [WorldGuard, Vault]
+
+api-version: 1.13
+
 commands:
    mlock:
       description: Monkey's Lockette

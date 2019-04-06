@@ -3,6 +3,8 @@ package monkeysLockette;
 import java.util.*;
 import java.util.logging.Logger;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldguard.WorldGuard;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 
@@ -845,7 +847,8 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 							{
 								BlockCanBuildEvent evt = new BlockCanBuildEvent(signspot, player, Material.WALL_SIGN.createBlockData(), true);
 								Bukkit.getServer().getPluginManager().callEvent(evt);
-								if (!evt.isBuildable() || (wg != null && !wg.getGlobalRegionManager().canBuild(player, signspot)))
+								if (!evt.isBuildable() || (wg != null && !WorldGuard.getInstance().getPlatform().getRegionContainer()
+										.createQuery().testBuild(BukkitAdapter.adapt(signspot.getLocation()), wg.wrapPlayer(player))))
 								{
 									DebugInfo(player.getName() + " tried to add sign at " + player.getLocation().toString() + "- build was denied by a build protection plugin.");
 									player.sendMessage(WarnColor + NobuildMessage);
