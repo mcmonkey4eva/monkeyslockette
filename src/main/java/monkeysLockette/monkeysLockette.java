@@ -524,7 +524,10 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 	{
 		return CheckLocked(ab, player, false);
 	}
-	public static int CheckLocked(Block ab, Player player, boolean hopper)
+	public static int CheckLocked(Block ab, Player player, boolean hopper) {
+		return CheckLocked(ab, player, hopper, null);
+	}
+	public static int CheckLocked(Block ab, Player player, boolean hopper, Location doesNotCount)
 	{
 		Block b = ab;
 		Material mat = b.getType();
@@ -667,6 +670,9 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 			}
 			if (tb.getType() == Material.WALL_SIGN || tb.getType() == Material.SIGN)
 			{
+				if (doesNotCount != null && doesNotCount.equals(tb.getLocation())) {
+					continue;
+				}
 				Sign trysign = (Sign)tb.getState();
 				String title = trysign.getLine(0);
 				Block potent = tb.getRelative(Util.DataToFace(tb.getData()));
@@ -956,8 +962,8 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 				player.sendMessage(WarnColor + EmptyMessage);
 				return;
 			}
-			int allowed = CheckLocked(targ, player);
-			if (allowed == AT_USER || allowed == AT_OWNER)
+			int allowed = CheckLocked(targ, player, false, block.getLocation());
+			if (allowed == AT_USER || allowed == AT_OWNER || allowed == AT_OP)
 			{
 				if (!isalockmore)
 				{
