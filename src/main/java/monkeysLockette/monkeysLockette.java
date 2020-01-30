@@ -258,16 +258,20 @@ public class monkeysLockette extends JavaPlugin implements Listener {
 		Log.info("Initializing...");
 		plug = this;
 		getServer().getPluginManager().registerEvents(this, this);
-		VaultEnabled = linkVault();
-		if (VaultEnabled)
-		{
-			Log.info("Vault loaded! Found " + String.valueOf(VaultPerm.getGroups().length) + " groups!");
-		}
-		else
-		{
-			Log.info("Error loading Vault!");
-		}
-		wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+			public void run() {
+				VaultEnabled = linkVault();
+				if (VaultEnabled)
+				{
+					Log.info("Vault loaded! Found " + String.valueOf(VaultPerm.getGroups().length) + " groups!");
+				}
+				else
+				{
+					Log.info("Error loading Vault!");
+				}
+				wg = (WorldGuardPlugin) Bukkit.getServer().getPluginManager().getPlugin("WorldGuard");
+			}
+		}, 20);
 		dt = new DoorThread();
 		dt.runTaskTimer(this, 20, 20);
 		ToClose = new ArrayList<Block>();
